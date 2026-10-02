@@ -1,17 +1,18 @@
 # Corrección de instalación
 
-La versión original usa el package `com.ftsol.splowtvsm` y está firmada con un certificado distinto.
+La APK original usa el package `com.ftsol.splowtvsm` y está firmada con un certificado distinto.
 
 Sin el keystore original no es posible instalar una build modificada como actualización sobre esa app conservando el mismo package.
 
-Para evitar el error de instalación, la build modificada usa:
+La build final de desarrollo usa:
 
-- package nuevo: `com.ftsol.splowtv31`
+- package: `com.ftsol.mvplayapp`
 - versionName: `3.1`
 - versionCode: `111`
+- botón: `ENTRAR INVITADO`
 
-Esto permite instalarla como una app independiente, incluso si la versión original sigue instalada.
+Este package es distinto tanto de la APK original como de las pruebas anteriores, por lo que Android puede instalarla como una app independiente sin el conflicto de firma que produjo el código de error 5.
 
-La APK corregida local generada en esta sesión tiene SHA-256:
+SHA-256 de la APK final generada:
 
-`808162843cc74d5bbe3bce1bffaf7934996416e4cd63e2bf73e24ff2eff83485`
+`86f36ad249058f82c7eeda45917cd36f85e8ad8586edf96be2836f735f213a39`
