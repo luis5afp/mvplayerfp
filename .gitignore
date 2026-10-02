@@ -1,0 +1,13 @@
+# APKs reconstruidos y temporales
+build/
+dist/
+*.idsig
+*.apks
+
+# Claves de firma: NUNCA subirlas
+*.jks
+*.keystore
+*.p12
+
+# Herramientas descargadas
+.tools/
