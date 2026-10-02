@@ -1,0 +1,106 @@
+name: Build latest APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "original/MV-Play.apk"
+      - "tools/agregar_invitado.py"
+      - "VERSION"
+      - ".github/workflows/build-latest-apk.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify base APK
+        run: |
+          test -f original/MV-Play.apk || {
+            echo "::error::Falta original/MV-Play.apk"
+            exit 1
+          }
+
+      - name: Build patched APK
+        run: |
+          mkdir -p build
+          python tools/agregar_invitado.py             original/MV-Play.apk             build/MV-Play-unsigned.apk
+
+      - name: Restore development signing key
+        id: signing-cache
+        uses: actions/cache@v4
+        with:
+          path: .signing/mvplay-dev.jks
+          key: mvplay-development-signing-v1
+
+      - name: Create development signing key
+        if: steps.signing-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .signing
+          keytool -genkeypair -v             -keystore .signing/mvplay-dev.jks             -storepass mvplay-development             -keypass mvplay-development             -alias mvplay             -keyalg RSA             -keysize 2048             -validity 10000             -dname "CN=MV Play Development, OU=Development, O=MV Play, L=Lima, C=PE"
+
+      - name: Locate apksigner
+        id: apksigner
+        shell: bash
+        run: |
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -n "$APKSIGNER"
+          echo "path=$APKSIGNER" >> "$GITHUB_OUTPUT"
+
+      - name: Sign APK
+        shell: bash
+        run: |
+          "${{ steps.apksigner.outputs.path }}" sign             --ks .signing/mvplay-dev.jks             --ks-key-alias mvplay             --ks-pass pass:mvplay-development             --key-pass pass:mvplay-development             --out build/MV-Play.apk             build/MV-Play-unsigned.apk
+
+          "${{ steps.apksigner.outputs.path }}" verify --verbose build/MV-Play.apk
+
+      - name: Publish current APK in repository
+        shell: bash
+        run: |
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          test -n "$VERSION"
+
+          mkdir -p releases/latest "releases/v$VERSION"
+          cp build/MV-Play.apk releases/latest/MV-Play.apk
+          cp build/MV-Play.apk "releases/v$VERSION/MV-Play-v$VERSION.apk"
+
+          SHA="$(sha256sum build/MV-Play.apk | awk '{print $1}')"
+          {
+            echo "Version: $VERSION"
+            echo "SHA-256: $SHA"
+            echo "Latest: releases/latest/MV-Play.apk"
+            echo "Versioned: releases/v$VERSION/MV-Play-v$VERSION.apk"
+          } > releases/BUILD-INFO.txt
+
+      - name: Commit APK
+        shell: bash
+        run: |
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f releases/latest/MV-Play.apk "releases/v$VERSION/MV-Play-v$VERSION.apk" releases/BUILD-INFO.txt
+
+          if git diff --cached --quiet; then
+            echo "APK sin cambios."
+            exit 0
+          fi
+
+          git commit -m "Actualizar APK v$VERSION [skip ci]"
+          git push
