@@ -20,7 +20,7 @@ import zlib
 
 EXPECTED_APK_SHA256 = "50606985e2bdfd0344b5f0e31b71b4c9c71294dec348346e2278363b1735f099"
 OLD_PACKAGE = "com.ftsol.splowtvsm"
-NEW_PACKAGE = "com.ftsol.splowtv31"
+NEW_PACKAGE = "com.ftsol.mvplayapp"
 
 def sha256_file(path):
     h = hashlib.sha256()
