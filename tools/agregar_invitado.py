@@ -19,6 +19,8 @@ import zipfile
 import zlib
 
 EXPECTED_APK_SHA256 = "50606985e2bdfd0344b5f0e31b71b4c9c71294dec348346e2278363b1735f099"
+OLD_PACKAGE = "com.ftsol.splowtvsm"
+NEW_PACKAGE = "com.ftsol.splowtv31"
 
 def sha256_file(path):
     h = hashlib.sha256()
@@ -118,6 +120,14 @@ def main():
         arsc = bytearray(zin.read("resources.arsc"))
         manifest = patch_manifest_version(zin.read("AndroidManifest.xml"))
 
+        old_pkg = OLD_PACKAGE.encode("utf-16le")
+        new_pkg = NEW_PACKAGE.encode("utf-16le")
+        if len(old_pkg) != len(new_pkg):
+            raise SystemExit("El package nuevo debe conservar la misma longitud binaria.")
+        if manifest.count(old_pkg) == 0:
+            raise SystemExit("No se encontró el package original en AndroidManifest.xml.")
+        manifest = manifest.replace(old_pkg, new_pkg)
+
         off_if = 0x3CBDE0 + 16 + 2 * 0x27
         if dex[off_if:off_if + 4] != bytes.fromhex("38000600"):
             raise SystemExit("No se encontró la instrucción esperada de visibilidad.")
@@ -136,6 +146,9 @@ def main():
         if len(old) != len(new) or arsc.count(old) != 1:
             raise SystemExit("No se encontró el texto esperado en resources.arsc.")
         arsc = arsc.replace(old, new, 1)
+        if arsc.count(old_pkg) == 0:
+            raise SystemExit("No se encontró el package original en resources.arsc.")
+        arsc = arsc.replace(old_pkg, new_pkg)
 
         with zipfile.ZipFile(out, "w", allowZip64=True) as zout:
             for info in zin.infolist():
@@ -162,6 +175,7 @@ def main():
     print(f"APK parcheada sin firmar: {out}")
     print("versionName: 3.1")
     print("versionCode: 111")
+    print(f"package: {NEW_PACKAGE}")
     print(f"SHA-256: {sha256_file(out)}")
     print("Debes firmarla antes de instalarla.")
 
