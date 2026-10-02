@@ -1,0 +1,52 @@
+name: Decompile APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "original/MV-Play.apk"
+
+permissions:
+  contents: write
+
+jobs:
+  decompile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Verify APK exists
+        run: test -f original/MV-Play.apk
+
+      - name: Download Apktool
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL "https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/apktool_3.0.3.jar" -o /tmp/apktool.jar
+          echo "dbf930b076c6b9be08d57c449cacefc3bdd6b71ebd59b3066fc0e1f5b14f9423  /tmp/apktool.jar" | sha256sum -c -
+
+      - name: Decompile
+        shell: bash
+        run: |
+          rm -rf decompiled
+          java -jar /tmp/apktool.jar d -f original/MV-Play.apk -o decompiled
+
+      - name: Commit decompiled source
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add decompiled
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Descompilar MV Play con Apktool"
+          git push
