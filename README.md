@@ -2,36 +2,46 @@
 
 Repositorio de trabajo para **MV Play**, preparado a partir del APK original.
 
-## Estado del repositorio
+## Datos confirmados del APK
 
-Ya están incluidos los scripts y la información necesarios para trabajar con el APK mediante **Apktool**. El binario `original/MV-Play.apk` debe estar presente para ejecutar la descompilación.
+- Package / applicationId: `com.ftsol.splowtvsm`
+- Nombre visible: **MV Play**
+- versionName: `3.0.9.1`
+- versionCode: `110`
+- minSdk: `17`
+- targetSdk: `29`
+- Código propio detectado principalmente bajo `com.ftsol.akyhay`
 
-## Descompilar en Windows
+## Estado
+
+Ya se analizaron y decodificaron localmente los recursos del APK. Se pudieron convertir a texto legible más de 2,700 XML y extraer 1,510 strings del paquete de recursos.
+
+Para tener el proyecto **completamente editable y reconstruible** en GitHub falta que exista el binario:
+
+```
+original/MV-Play.apk
+```
+
+Cuando ese archivo esté en el repo, el workflow **Decompile APK** ejecutará Apktool y creará automáticamente `decompiled/`, incluyendo recursos y Smali.
+
+## Descompilar manualmente en Windows
 
 1. Instala Java 17 o superior.
 2. Coloca el APK como `original/MV-Play.apk`.
-3. Abre PowerShell en la carpeta del repositorio.
-4. Ejecuta:
+3. Ejecuta:
 
 ```powershell
 .\tools\decompilar.ps1
 ```
 
-Esto creará `decompiled/`, donde podrás editar recursos XML y código Smali.
-
-## Recompilar en Windows
+## Recompilar
 
 ```powershell
 .\tools\recompilar.ps1
 ```
 
-El APK reconstruido quedará en `build/MV-Play-unsigned.apk`.
+El resultado se crea como `build/MV-Play-unsigned.apk`. Después hay que firmarlo con un keystore propio.
 
-> El APK reconstruido no conserva automáticamente la firma original. Para instalarlo o distribuirlo tendrás que firmarlo con tu propio keystore.
+## Aviso de privacidad
 
-## APK original identificado
-
-- Archivo: `MV-Play.apk`
-- Tamaño: 79,298,159 bytes (~76 MiB)
-- SHA-256: `50606985e2bdfd0344b5f0e31b71b4c9c71294dec348346e2278363b1735f099`
-- Namespace/clases detectadas: `com.ftsol.akyhay`
+Este repositorio actualmente es **público**. Una descompilación completa puede exponer URLs, configuraciones y otras cadenas incluidas dentro del APK. Si el proyecto debe mantenerse privado, cambia la visibilidad del repositorio antes de subir el APK.
