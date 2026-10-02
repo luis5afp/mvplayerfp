@@ -1,0 +1,7 @@
+Archivo: MV-Play.apk
+Tamaño aproximado: 76 MB
+SHA-256: 50606985e2bdfd0344b5f0e31b71b4c9c71294dec348346e2278363b1735f099
+Namespace/clases detectadas en DEX: com.ftsol.akyhay
+Cadena de nombre detectada: AkyHay / AkyHayPlayer
+
+Nota: los datos anteriores se extrajeron del APK compilado y no garantizan que sean el applicationId final mostrado por Android.
