@@ -1,6 +1,6 @@
 # MV Play
 
-Repositorio de trabajo para **MV Play**, preparado a partir del APK original.
+Repositorio de trabajo para **MV Play**.
 
 ## Build modificada actual
 
@@ -20,29 +20,19 @@ Repositorio de trabajo para **MV Play**, preparado a partir del APK original.
 - targetSdk: `29`
 - Código propio detectado principalmente bajo `com.ftsol.akyhay`
 
-## Estado
+## Descarga
 
-Ya se analizaron y decodificaron localmente los recursos del APK. Se pudieron convertir a texto legible más de 2,700 XML y extraer 1,510 strings del paquete de recursos.
+La build actual se identifica como `MV-Play-v3.1-Invitado.apk`.
 
-El script `tools/agregar_invitado.py` genera la build 3.1 con modo Invitado a partir del APK original exacto.
+SHA-256:
 
-## Descompilar manualmente en Windows
+`338d020e246dd60ba792af931f53c9a5fb713e78e1e26e34e44ad83e750d1c37`
 
-1. Instala Java 17 o superior.
-2. Coloca el APK original como `original/MV-Play.apk`.
-3. Ejecuta:
+Para publicarla como enlace permanente de GitHub, debe adjuntarse ese archivo a un Release `v3.1`.
 
-```powershell
-.\tools\decompilar.ps1
-```
+## Herramientas
 
-## Recompilar
-
-```powershell
-.\tools\recompilar.ps1
-```
-
-El APK reconstruido debe firmarse con un keystore antes de instalarlo.
+El script `tools/agregar_invitado.py` reproduce el parche sobre el APK original exacto.
 
 ## Aviso de privacidad
 
