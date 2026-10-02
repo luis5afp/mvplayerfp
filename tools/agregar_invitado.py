@@ -6,7 +6,7 @@ Genera una build modificada:
 - versionName 3.1
 - versionCode 111
 - muestra siempre el botón de invitado
-- texto "ENTRAR INVITADO!"
+- texto "ENTRAR INVITADO" en inglés y español
 - abre NewDashboardActivity sin pasar por FreeTrailActivity
 
 El APK resultante queda SIN FIRMAR.
@@ -28,6 +28,25 @@ def sha256_file(path):
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
     return h.hexdigest()
+
+def patch_utf8_pool_string(buf, old, new):
+    oldb = old.encode("utf-8")
+    newb = new.encode("utf-8")
+    idx = buf.find(oldb)
+    if idx < 0:
+        raise SystemExit(f"No se encontró el texto: {old}")
+
+    p = idx - 2
+    if buf[p] != len(old) or buf[p + 1] != len(oldb):
+        raise SystemExit(f"Cabecera inesperada para: {old}")
+
+    old_total = 2 + len(oldb) + 1
+    replacement = bytes([len(new), len(newb)]) + newb + b"\\x00"
+    if len(replacement) > old_total:
+        raise SystemExit(f"El texto nuevo es demasiado largo: {new}")
+
+    replacement += b"\\x00" * (old_total - len(replacement))
+    buf[p:p + old_total] = replacement
 
 def patch_manifest_version(manifest):
     manifest = bytearray(manifest)
@@ -141,11 +160,8 @@ def main():
         dex[12:32] = hashlib.sha1(dex[32:]).digest()
         dex[8:12] = struct.pack("<I", zlib.adler32(dex[12:]) & 0xFFFFFFFF)
 
-        old = b"Get A Free Trial"
-        new = b"ENTRAR INVITADO!"
-        if len(old) != len(new) or arsc.count(old) != 1:
-            raise SystemExit("No se encontró el texto esperado en resources.arsc.")
-        arsc = arsc.replace(old, new, 1)
+        patch_utf8_pool_string(arsc, "Get A Free Trial", "ENTRAR INVITADO")
+        patch_utf8_pool_string(arsc, "Obtenga una demo gratuita", "ENTRAR INVITADO")
         if arsc.count(old_pkg) == 0:
             raise SystemExit("No se encontró el package original en resources.arsc.")
         arsc = arsc.replace(old_pkg, new_pkg)
